@@ -1,4 +1,5 @@
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -156,6 +157,10 @@ static bool callValue(const Value callee, const uint8_t argCount)
     {
         switch (OBJ_TYPE(callee))
         {
+            case OBj_BOUND_METHOD: {
+                ObjBoundMethod* bound = AS_BOUND_METHOD(callee);
+                return call(bound->method, argCount);
+            }
             case OBJ_CLASS: {
                 ObjClass* klass = AS_CLASS(callee);
                 vm.stackTop[-argCount - 1] = OBJ_VAL(newInstance(klass));
@@ -179,6 +184,18 @@ static bool callValue(const Value callee, const uint8_t argCount)
     }
     runtimeError("Can only call functions and classes.");
     return false;
+}
+
+static bool bindMethod(const ObjClass* klass, const Value name) {
+    Value method;
+    if(!tableGet(&klass->methods, name, &method)){
+        runtimeError("Undefined property '%s'.", AS_CSTRING(name));
+        return false;
+    }
+
+    ObjBoundMethod* bound = newBoundMethod(peek(0), AS_CLOSURE(method));
+    replace(OBJ_VAL(bound));
+    return true;
 }
 
 static ObjUpvalue *captureUpvalue(Value *local)
@@ -221,7 +238,7 @@ static void closeUpvalues(const Value *last)
 }
 
 static void defineMethod(const Value name) {
-    Value method = peek(0);
+    const Value method = peek(0);
     ObjClass* klass = AS_CLASS(peek(1));
     tableSet(&klass->methods, name, method);
     pop();
@@ -478,8 +495,11 @@ static InterpretResult run()
                 break;
             }
 
-            runtimeError("Undefined property '%s'.", AS_CSTRING(name));
-            return INTERPRET_RUNTIME_ERROR;
+            if(!bindMethod(instance->klass, name)) {
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            
+            break;
         }
         case OP_SET_PROPERTY: {
             if(!IS_INSTANCE(peek(1))){

@@ -82,7 +82,7 @@ int main(const int argc, const char *argv[])
     }
     else
     {
-        fprintf(stderr, "Usage: clos [path]\n");
+        fprintf(stderr, "Usage: clox [path]\n");
         exit(64);
     }
 

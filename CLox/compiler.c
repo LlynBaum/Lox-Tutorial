@@ -1185,12 +1185,11 @@ static void function(const FunctionType type, ObjString *name)
 static void method() {
     consume(TOKEN_IDENTIFIER, "Expect method name.");
     const Token *name = &parser.previous;
-    int constant = makeIdentifier(name);
-    emitIndex(OP_METHOD, constant, name->line);
+    const int constant = makeIdentifier(name);
 
-    FunctionType type = TYPE_FUNCTION;
     ObjString *nameObj = copyString(name->start, name->length);
-    function(type, nameObj);
+    function(TYPE_FUNCTION, nameObj);
+    emitIndex(OP_METHOD, constant, name->line);
 }
 
 static void classDeclaration() {
