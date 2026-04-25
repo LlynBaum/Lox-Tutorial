@@ -119,7 +119,6 @@ static void skipWhitespace()
             default:
                 return;
         }
-        printf("Next char %i\n", (int)peek());
     }
 }
 
@@ -394,6 +393,5 @@ Token scanToken()
         return string();
     }
 
-    printf("%i", (int)c);
     return errorToken("Unexpected character.");
 }

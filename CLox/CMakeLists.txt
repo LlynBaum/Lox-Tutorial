@@ -3,6 +3,29 @@ project(CLox C)
 
 set(CMAKE_C_STANDARD 99)
 
+# 1. Define the options (these show up in your IDE UI)
+option(DEBUG_TRACE_EXECUTION "Enable execution tracing" OFF)
+option(DEBUG_PRINT_CODE      "Enable code printing"      OFF)
+option(DEBUG_STRESS_GC       "Enable GC stress testing"  OFF)
+option(DEBUG_LOG_GC          "Enable GC logging"         OFF)
+
+# 2. Pass them to the compiler if they are turned ON
+if(DEBUG_TRACE_EXECUTION)
+        add_compile_definitions(DEBUG_TRACE_EXECUTION)
+endif()
+
+if(DEBUG_PRINT_CODE)
+        add_compile_definitions(DEBUG_PRINT_CODE)
+endif()
+
+if(DEBUG_STRESS_GC)
+        add_compile_definitions(DEBUG_STRESS_GC)
+endif()
+
+if(DEBUG_LOG_GC)
+        add_compile_definitions(DEBUG_LOG_GC)
+endif()
+
 add_executable(CLox clox.c
         common.h
         chunk.h
