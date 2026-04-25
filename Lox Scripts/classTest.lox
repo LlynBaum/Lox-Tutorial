@@ -11,3 +11,28 @@ print delProperty(t, "xyz"); // false
 
 print delProperty(t, "abc"); // true
 print hasProperty(t, "abc"); // false
+
+
+
+
+class Scone {
+    topping(first, second) {
+        print "scone with ${first} and ${second}";
+    }
+}
+
+var scone = Scone();
+scone.topping("berries", "cream");
+
+
+class Nested {
+    method() {
+        fun func() {
+            print this;
+        }
+
+        func();
+    }
+}
+
+Nested().method();
