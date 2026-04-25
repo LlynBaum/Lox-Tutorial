@@ -1,7 +1,0 @@
-Benchmark Results (Orig 1000) 
-Timestamp: [2025-08-29 13:32:14]
-Warmup: 3, Iterations: 100
-Batch time (ns): min=85600  max=608500  avg=112617
-Per-op avg (ns): 112617.00
-Throughput (ops/s): 8880
---------------------------------------
