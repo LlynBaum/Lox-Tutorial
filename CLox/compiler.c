@@ -1182,6 +1182,17 @@ static void function(const FunctionType type, ObjString *name)
     }
 }
 
+static void method() {
+    consume(TOKEN_IDENTIFIER, "Expect method name.");
+    const Token *name = &parser.previous;
+    int constant = makeIdentifier(name);
+    emitIndex(OP_METHOD, constant, name->line);
+
+    FunctionType type = TYPE_FUNCTION;
+    ObjString *nameObj = copyString(name->start, name->length);
+    function(type, nameObj);
+}
+
 static void classDeclaration() {
     const int index = parseVariable("Expect class name.", true);
 
@@ -1193,8 +1204,15 @@ static void classDeclaration() {
     emitBytes(OP_CLASS, nameConst);
     defineVariable(index, name->line);
 
+    namedVariable(*name, false);
     consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
+
+    while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF)) {
+        method();
+    }
+
     consume(TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
+    emitByte(OP_POP);
 }
 
 static void funDeclaration() {

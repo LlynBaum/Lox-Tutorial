@@ -220,6 +220,13 @@ static void closeUpvalues(const Value *last)
     }
 }
 
+static void defineMethod(const Value name) {
+    Value method = peek(0);
+    ObjClass* klass = AS_CLASS(peek(1));
+    tableSet(&klass->methods, name, method);
+    pop();
+}
+
 static bool isFalsey(const Value value)
 {
     return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
@@ -683,6 +690,9 @@ static InterpretResult run()
         }
         case OP_CLASS: 
             push(OBJ_VAL(newClass(AS_STRING(READ_CONSTANT()))));
+            break;
+        case OP_METHOD:
+            defineMethod(READ_CONSTANT());
             break;
         default:
             break; // Unreachable
