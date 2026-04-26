@@ -65,12 +65,13 @@ void markObject(Obj *object) {
 #endif // DEBUG_LOG_GC
 }
 
-void markValue(Value value) {
-  if (IS_OBJ(value))
-    markObject(AS_OBJ(value));
+void markValue(const Value value) {
+  if (IS_OBJ(value)) {
+      markObject(AS_OBJ(value));
+  }
 }
 
-static void markArray(ValueArray* array) {
+static void markArray(const ValueArray* array) {
     for (int i = 0; i < array->count; i++) {
         markValue(array->values[i]);
     }
@@ -175,26 +176,27 @@ static void freeObject(Obj *object) {
 }
 
 static void markRoots() {
-  for (Value *slot = vm.stack; slot < vm.stackTop; slot++) {
+    for (const Value *slot = vm.stack; slot < vm.stackTop; slot++) {
     markValue(*slot);
-  }
+    }
 
-  markTable(&vm.globals.globalNames);
-  for (int i = 0; i < vm.globals.count; i++) {
+    markTable(&vm.globals.globalNames);
+    for (int i = 0; i < vm.globals.count; i++) {
     markValue(vm.globals.values[i].value);
-  }
+    }
 
-  for (int i = 0; i < vm.frameCount; i++) {
+    for (int i = 0; i < vm.frameCount; i++) {
     markObject((Obj *)vm.frames[i].closure);
-  }
+    }
 
-  ObjUpvalue *upvalue = vm.openUpvalues;
-  while (upvalue != NULL) {
+    ObjUpvalue *upvalue = vm.openUpvalues;
+    while (upvalue != NULL) {
     markObject((Obj *)upvalue);
     upvalue = upvalue->next;
-  }
+    }
 
-  markCompilerRoots();
+    markCompilerRoots();
+    markValue(vm.initString);
 }
 
 static void traceReferences() {

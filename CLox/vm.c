@@ -85,6 +85,9 @@ void initVM()
     initGlobals(&vm.globals);
     initTable(&vm.strings);
 
+    vm.initString = OBJ_VAL(NULL); // GC might try to collect un init memory in copyString.
+    vm.initString = OBJ_VAL(copyString("init", 4));
+
     defineNative("clock", clockNative);
     defineNative("read", readNative);
     defineNative("err", errNative);
@@ -100,6 +103,7 @@ void initVM()
 
 void freeVM()
 {
+    vm.initString = OBJ_VAL(NULL); // GC will free the string
     freeObjects();
     freeGlobals(&vm.globals);
     freeTable(&vm.strings);
@@ -167,6 +171,14 @@ static bool callValue(const Value callee, const uint8_t argCount)
             case OBJ_CLASS: {
                 ObjClass* klass = AS_CLASS(callee);
                 vm.stackTop[-argCount - 1] = OBJ_VAL(newInstance(klass));
+                Value initializer;
+                if (tableGet(&klass->methods, vm.initString, &initializer)) {
+                    return call(AS_CLOSURE(initializer), argCount);
+                }
+                if (argCount != 0) {
+                    runtimeError("Expected 0 arguments but got %d", argCount);
+                    return false;
+                }
                 return true;
             }
             case OBJ_CLOSURE:
