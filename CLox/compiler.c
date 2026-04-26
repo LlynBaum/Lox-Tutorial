@@ -796,12 +796,20 @@ static void call(bool _) {
 
 static void dot(const bool canAssign) {
     consume(TOKEN_IDENTIFIER, "Expect property name after '.'.");
-    const int name = makeIdentifier(&parser.previous);
+    const Token* nameToken = &parser.previous;
+    const int name = makeIdentifier(nameToken);
 
     if (canAssign && match(TOKEN_EQUAL)) {
         expression();
         emitBytes(OP_SET_PROPERTY, name);
-    } else {
+    }
+    else if (match(TOKEN_LEFT_PAREN)) {
+        const uint8_t argCount = argumentList();
+        emitIndex(OP_INVOKE, name, nameToken->line);
+        emitByte(argCount);
+    }
+    else
+    {
         emitBytes(OP_GET_PROPERTY, name);
     }
 }

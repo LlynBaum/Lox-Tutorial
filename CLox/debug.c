@@ -64,6 +64,24 @@ static int jumpInstruction(const char* name, const int sign, const Chunk* chunk,
     return offset + 3;
 }
 
+int invokeInstructionU8(const char* name, const Chunk * chunk, const int offset) {
+    const uint8_t constant = chunk->code[offset + 1];
+    const uint8_t argCount = chunk->code[offset + 2];
+    printf("%-16s (%d args) %4d '", name, argCount, constant);
+    printValue(chunk->constants.values[constant]);
+    printf("'\n");
+    return offset + 3;
+}
+
+int invokeInstructionU24(const char* name, const Chunk * chunk, const int offset) {
+    const int constant = disassembleU24Constant(chunk, offset);
+    const uint8_t argCount = chunk->code[offset + 2];
+    printf("%-16s (%d args) %4d '", name, argCount, constant);
+    printValue(chunk->constants.values[constant]);
+    printf("'\n");
+    return offset + 5;
+}
+
 int disassembleInstruction(const Chunk* chunk, int offset) {
 #define constInstruction(nameU8, nameU24, chunk, offset) wideInstruction \
         ? constantInstructionU24(nameU24, chunk, offset) \
@@ -76,6 +94,10 @@ int disassembleInstruction(const Chunk* chunk, int offset) {
 #define incrementInstruction(nameU8, nameU24, chunk, offset) wideInstruction \
         ? incrementInstructionU24(nameU24, chunk, offset) \
         : incrementInstructionU8(nameU8, chunk, offset);
+
+#define invokeInstruction(nameU8, nameU24, chunk, offset) wideInstruction \
+        ? invokeInstructionU24(nameU24, chunk, offset) \
+        : invokeInstructionU8(nameU8, chunk, offset);
 
     printf("%04d ", offset);
     const int line = getLine(chunk, offset);
@@ -201,6 +223,8 @@ int disassembleInstruction(const Chunk* chunk, int offset) {
                     offset - 2, isLocal ? "local" : "upvalue", index);
             }
         }
+        case OP_INVOKE:
+            return invokeInstruction("OP_INVOKE", "OP_INVOKE.W", chunk, offset);
         case OP_CLOSE_UPVALUE:
             return simpleInstruction("OP_CLOSE_UPVALUE", offset);
         case OP_RETURN:
