@@ -379,7 +379,7 @@ static void initCompiler(Compiler *compiler, const FunctionType type, ObjString 
     local->immutable = true;
     local->isCaptured = false;
 
-    if (type == TYPE_METHOD) {
+    if (type == TYPE_METHOD || type == TYPE_INITIALIZER) {
         local->name.start = "this";
         local->name.length = 4;
     } else {
