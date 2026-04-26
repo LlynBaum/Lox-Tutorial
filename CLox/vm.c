@@ -3,13 +3,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <stdlib.h>
 
 #include "chunk.h"
 #include "common.h"
 #include "vm.h"
 
-#include "debug.h"
 #include "compiler.h"
 #include "memory.h"
 #include "object.h"
@@ -22,6 +20,10 @@
 #include "stdlib/nativeErr.h"
 #include "stdlib/classUtils.h"
 #include "value.h"
+
+#ifdef DEBUG_TRACE_EXECUTION
+#include "debug.h"
+#endif
 
 VM vm;
 
@@ -271,12 +273,12 @@ static void concatenate() {
     replace(resultVal);
 }
 
-static bool numberToI64(Value v, int64_t *out)
+static bool numberToI64(const Value v, int64_t *out)
 {
     if (!IS_NUMBER(v))
         return false;
-    double d = AS_NUMBER(v);
-    double t = trunc(d);
+    const double d = AS_NUMBER(v);
+    const double t = trunc(d);
     if (d != t)
         return false;
     if (t < (double)INT64_MIN || t > (double)INT64_MAX)
