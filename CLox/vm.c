@@ -284,7 +284,7 @@ static void defineMethod(const Value name) {
     ObjClass* klass = AS_CLASS(peek(1));
 
     const ObjClosure* closure = AS_CLOSURE(method);
-    if (klass->init == NULL && closure->function->name->length == 4 && memcmp(closure->function->name->chars, "init", 4) == 0)
+    if (klass->init == NULL && closure->function->name == AS_STRING(vm.initString))
     {
         klass->init = AS_CLOSURE(method);
     }
