@@ -21,7 +21,7 @@
  Non-Zero | Smaller than oldSize | Shrink existing allocation
  Non-zero | Larger than oldSize | Grow existing allocation.
  */
-void* reallocate(void *pointer, size_t oldSize, const size_t newSize) {
+void* reallocate(void *pointer, const size_t oldSize, const size_t newSize) {
   vm.bytesAllocated += newSize - oldSize;
   if (newSize > oldSize) {
 #ifdef DEBUG_STRESS_GC
@@ -39,8 +39,7 @@ void* reallocate(void *pointer, size_t oldSize, const size_t newSize) {
   }
 
   void *result = realloc(pointer, newSize);
-  if (result == NULL)
-    exit(1);
+  if (result == NULL) exit(1);
   return result;
 }
 
@@ -86,7 +85,7 @@ static void blackenObject(Obj* object) {
 
     switch (objType(object)) {
         case OBj_BOUND_METHOD: {
-          ObjBoundMethod* bound = (ObjBoundMethod*)object;
+          const ObjBoundMethod* bound = (ObjBoundMethod*)object;
           markValue(bound->receiver);
           markObject((Obj*)bound->method);
           break;
@@ -95,10 +94,11 @@ static void blackenObject(Obj* object) {
           ObjClass* klass = (ObjClass*)object;
           markTable(&klass->methods);
           markObject((Obj*)klass->name);
+          markObject((Obj*)klass->init);
           break;
         }
         case OBJ_CLOSURE: {
-          ObjClosure* closure = (ObjClosure*)object;
+          const ObjClosure* closure = (ObjClosure*)object;
           markObject((Obj*)closure->function);
           for (int i = 0; i < closure->upvalueCount; i++) {
               markObject((Obj*)closure->upvalues[i]);
@@ -106,7 +106,7 @@ static void blackenObject(Obj* object) {
           break;
         }
         case OBJ_FUNCTION:{
-          ObjFunction* function = (ObjFunction*)object;
+          const ObjFunction* function = (ObjFunction*)object;
           markObject((Obj*)function->name);
           markArray(&function->chunk.constants);
           break;
@@ -177,22 +177,22 @@ static void freeObject(Obj *object) {
 
 static void markRoots() {
     for (const Value *slot = vm.stack; slot < vm.stackTop; slot++) {
-    markValue(*slot);
+        markValue(*slot);
     }
 
     markTable(&vm.globals.globalNames);
-    for (int i = 0; i < vm.globals.count; i++) {
-    markValue(vm.globals.values[i].value);
+        for (int i = 0; i < vm.globals.count; i++) {
+        markValue(vm.globals.values[i].value);
     }
 
     for (int i = 0; i < vm.frameCount; i++) {
-    markObject((Obj *)vm.frames[i].closure);
+        markObject((Obj *)vm.frames[i].closure);
     }
 
     ObjUpvalue *upvalue = vm.openUpvalues;
     while (upvalue != NULL) {
-    markObject((Obj *)upvalue);
-    upvalue = upvalue->next;
+        markObject((Obj *)upvalue);
+        upvalue = upvalue->next;
     }
 
     markCompilerRoots();

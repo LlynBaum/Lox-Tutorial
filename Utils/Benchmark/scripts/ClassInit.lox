@@ -1,0 +1,13 @@
+class ClassInit {
+  init(num) {
+    this.num = num;
+  }
+}
+
+var start = clock();
+
+for (var i = 0; i < 50000000; i = i + 1) {
+  var c = ClassInit(i);
+}
+
+print clock() - start;

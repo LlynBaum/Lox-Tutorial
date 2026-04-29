@@ -171,9 +171,8 @@ static bool callValue(const Value callee, const uint8_t argCount)
             case OBJ_CLASS: {
                 ObjClass* klass = AS_CLASS(callee);
                 vm.stackTop[-argCount - 1] = OBJ_VAL(newInstance(klass));
-                Value initializer;
-                if (tableGet(&klass->methods, vm.initString, &initializer)) {
-                    return call(AS_CLOSURE(initializer), argCount);
+                if (klass->init != NULL) {
+                    return call(klass->init, argCount);
                 }
                 if (argCount != 0) {
                     runtimeError("Expected 0 arguments but got %d", argCount);
@@ -241,7 +240,7 @@ static bool bindMethod(const ObjClass* klass, const Value name) {
     return true;
 }
 
-static ObjUpvalue *captureUpvalue(Value *local)
+static ObjUpvalue* captureUpvalue(Value *local)
 {
     ObjUpvalue *prevUpvalue = NULL;
     ObjUpvalue *upvalue = vm.openUpvalues;
@@ -283,7 +282,17 @@ static void closeUpvalues(const Value *last)
 static void defineMethod(const Value name) {
     const Value method = peek(0);
     ObjClass* klass = AS_CLASS(peek(1));
-    tableSet(&klass->methods, name, method);
+
+    const ObjClosure* closure = AS_CLOSURE(method);
+    if (klass->init == NULL && closure->function->name->length == 4 && memcmp(closure->function->name->chars, "init", 4) == 0)
+    {
+        klass->init = AS_CLOSURE(method);
+    }
+    else
+    {
+        tableSet(&klass->methods, name, method);
+    }
+
     pop();
 }
 
@@ -366,8 +375,7 @@ static InterpretResult run()
         replace(NUMBER_VAL((double)result));                      \
     } while (false);
 
-    while (false)
-        ;
+    while (false);
 
     for (;;)
     {
@@ -708,13 +716,16 @@ static InterpretResult run()
             ip = frame->ip;
             break;
         }
-        case OP_INVOKE: {
+        case OP_INVOKE:
+        {
             Value method = READ_CONSTANT();
             int argCount = READ_U8();
+            frame->ip = ip;
             if (!invoke(method, argCount)) {
                 return INTERPRET_RUNTIME_ERROR;
             }
             frame = &vm.frames[vm.frameCount -1];
+            ip = frame->ip;
             break;
         }
         case OP_CLOSURE:
