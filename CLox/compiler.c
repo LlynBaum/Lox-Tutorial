@@ -1237,19 +1237,31 @@ static void method() {
 static void classDeclaration() {
     const int index = parseVariable("Expect class name.", true);
 
-    const Token* name = &parser.previous;
-    const int nameConst = makeIdentifier(name);
+    const Token* className = &parser.previous;
+    const int nameConst = makeIdentifier(className);
 
     makeInitialized();
 
     emitBytes(OP_CLASS, nameConst);
-    defineVariable(index, name->line);
+    defineVariable(index, className->line);
 
     ClassCompiler classCompiler;
     classCompiler.enclosing = currentClass;
     currentClass = &classCompiler;
 
-    namedVariable(*name, false);
+    if (match(TOKEN_LESS)) {
+        consume(TOKEN_IDENTIFIER, "Expect superclass name.");
+        variable(false);
+
+        if (identifiersEqual(className, &parser.previous)) {
+            error("A class can't inherit from itself.");
+        }
+
+        namedVariable(*className, false);
+        emitByte(OP_INHERIT);
+    }
+
+    namedVariable(*className, false);
     consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
 
     while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF)) {
