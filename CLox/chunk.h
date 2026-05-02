@@ -55,6 +55,7 @@ typedef enum {
     OP_CALL,
     OP_INVOKE,
     OP_SUPER_INVOKE,
+    OP_SUPER_INIT,
     OP_CLOSURE,
     OP_CLOSE_UPVALUE,
     OP_RETURN,

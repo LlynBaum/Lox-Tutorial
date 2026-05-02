@@ -230,6 +230,8 @@ int disassembleInstruction(const Chunk *chunk, int offset) {
             return invokeInstruction("OP_INVOKE", "OP_INVOKE.W", chunk, offset);
         case OP_SUPER_INVOKE:
             return invokeInstruction("OP_SUPER_INVOKE", "OP_SUPER_INVOKE.W", chunk, offset);
+        case OP_SUPER_INIT:
+            return indexInstructionU8("OP_SUPER_INIT", chunk, offset);
         case OP_CLOSE_UPVALUE:
             return simpleInstruction("OP_CLOSE_UPVALUE", offset);
         case OP_RETURN:

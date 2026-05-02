@@ -340,8 +340,6 @@ static InterpretResult run() {
         replace(NUMBER_VAL((double)result));                      \
     } while (false);
 
-    while (false);
-
     for (;;) {
 #ifdef DEBUG_TRACE_EXECUTION
         printf("          ");
@@ -671,6 +669,22 @@ static InterpretResult run() {
                 ip = frame->ip;
                 break;
             }
+            case OP_SUPER_INIT: {
+                int argCount = READ_U8();
+                ObjInstance* instance = AS_INSTANCE(peek(argCount));
+                if (instance->klass->superInit == NULL) {
+                    break;
+                }
+
+                frame->ip = ip;
+                if (!call(instance->klass->superInit, argCount)) {
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+
+                frame = &vm.frames[vm.frameCount - 1];
+                ip = frame->ip;
+                break;
+            }
             case OP_CLOSURE: {
                 ObjFunction *function = AS_FUNCTION(READ_CONSTANT());
                 ObjClosure *closure = newClosure(function);
@@ -717,6 +731,7 @@ static InterpretResult run() {
                 }
 
                 ObjClass *subclass = AS_CLASS(peek(0));
+                subclass->superInit = AS_CLASS(superclass)->init;
                 tableAddAll(&AS_CLASS(superclass)->methods, &subclass->methods);
                 pop();
                 break;

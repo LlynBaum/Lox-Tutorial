@@ -1093,6 +1093,16 @@ static void function(const FunctionType type, ObjString *name) {
         } while (match(TOKEN_COMMA));
     }
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after parameters.");
+
+    if (type == TYPE_INITIALIZER && currentClass->hasSuperclass) {
+        consume(TOKEN_COLON, "Expected ':' after 'init' for subclass.");
+        consume(TOKEN_SUPER, "Expected 'super'.");
+
+        consume(TOKEN_LEFT_PAREN, "Expect '(' after 'super'.");
+        const uint8_t argCount = argumentList();
+        emitBytes(OP_SUPER_INIT, argCount);
+    }
+
     consume(TOKEN_LEFT_BRACE, "Expect '{' before function body.");
     block();
 

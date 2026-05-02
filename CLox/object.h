@@ -73,6 +73,7 @@ typedef struct {
     Obj obj;
     ObjString *name;
     ObjClosure *init;
+    ObjClosure *superInit;
     Table methods;
 } ObjClass;
 
