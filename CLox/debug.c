@@ -162,6 +162,8 @@ int disassembleInstruction(const Chunk* chunk, int offset) {
             return indexInstruction("OP_GET_PROPERTY", "OP_GET_PROPERTY.W", chunk, offset);
         case OP_SET_PROPERTY:
             return indexInstruction("OP_SET_PROPERTY", "OP_SET_PROPERTY.W", chunk, offset);
+        case OP_GET_SUPER:
+            return constInstruction("OP_GET_SUPER", "OP_GET_SUPER.W", chunk, offset);
         case OP_EQUAL:
             return simpleInstruction("OP_EQUAL", offset);
         case OP_GREATER:
@@ -226,6 +228,8 @@ int disassembleInstruction(const Chunk* chunk, int offset) {
         }
         case OP_INVOKE:
             return invokeInstruction("OP_INVOKE", "OP_INVOKE.W", chunk, offset);
+        case OP_SUPER_INVOKE:
+            return invokeInstruction("OP_SUPER_INVOKE", "OP_SUPER_INVOKE.W", chunk, offset);
         case OP_CLOSE_UPVALUE:
             return simpleInstruction("OP_CLOSE_UPVALUE", offset);
         case OP_RETURN:
