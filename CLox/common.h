@@ -6,20 +6,20 @@
 #include <stddef.h>
 
 #ifndef DEBUG_TRACE_EXECUTION
-  // Uncomment the line below to enable it by default in your IDE
-  // #define DEBUG_TRACE_EXECUTION
+// Uncomment the line below to enable it by default in your IDE
+// #define DEBUG_TRACE_EXECUTION
 #endif
 
 #ifndef DEBUG_PRINT_CODE
-  // #define DEBUG_PRINT_CODE
+// #define DEBUG_PRINT_CODE
 #endif
 
 #ifndef DEBUG_STRESS_GC
-  // #define DEBUG_STRESS_GC
+// #define DEBUG_STRESS_GC
 #endif
 
 #ifndef DEBUG_LOG_GC
-  // #define DEBUG_LOG_GC
+// #define DEBUG_LOG_GC
 #endif
 
 #define UINT8_COUNT (UINT8_MAX + 1)

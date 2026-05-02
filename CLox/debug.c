@@ -3,7 +3,7 @@
 #include "chunk.h"
 #include "object.h"
 
-void disassembleChunk(const Chunk* chunk, const char* name) {
+void disassembleChunk(const Chunk *chunk, const char *name) {
     printf("== %s ==\n", name);
 
     for (int offset = 0; offset < chunk->count;) {
@@ -11,12 +11,12 @@ void disassembleChunk(const Chunk* chunk, const char* name) {
     }
 }
 
-static int simpleInstruction(const char* name, const int offset) {
+static int simpleInstruction(const char *name, const int offset) {
     printf("%s\n", name);
     return offset + 1;
 }
 
-static int constantInstructionU8(const char * name, const Chunk * chunk, const int offset) {
+static int constantInstructionU8(const char *name, const Chunk *chunk, const int offset) {
     const uint8_t constant = chunk->code[offset + 1];
     printf("%-16s %4d '", name, constant);
     printValue(chunk->constants.values[constant]);
@@ -24,7 +24,7 @@ static int constantInstructionU8(const char * name, const Chunk * chunk, const i
     return offset + 2;
 }
 
-static int constantInstructionU24(const char * name, const Chunk * chunk, const int offset) {
+static int constantInstructionU24(const char *name, const Chunk *chunk, const int offset) {
     const int constant = disassembleU24Constant(chunk, offset);
     printf("%-16s %4d '", name, constant);
     printValue(chunk->constants.values[constant]);
@@ -32,39 +32,39 @@ static int constantInstructionU24(const char * name, const Chunk * chunk, const 
     return offset + 4;
 }
 
-static int indexInstructionU8(const char * name, const Chunk * chunk, const int offset) {
+static int indexInstructionU8(const char *name, const Chunk *chunk, const int offset) {
     const uint8_t constant = chunk->code[offset + 1];
     printf("%-16s %4d \n", name, constant);
     return offset + 2;
 }
 
-static int indexInstructionU24(const char * name, const Chunk * chunk, const int offset) {
+static int indexInstructionU24(const char *name, const Chunk *chunk, const int offset) {
     const int constant = disassembleU24Constant(chunk, offset);
     printf("%-16s %4d \n", name, constant);
     return offset + 4;
 }
 
-static int incrementInstructionU8(const char * name, const Chunk * chunk, const int offset) {
+static int incrementInstructionU8(const char *name, const Chunk *chunk, const int offset) {
     const uint8_t constant = chunk->code[offset + 1];
     const uint8_t imm = chunk->code[offset + 2];
     printf("%-16s %4d %4d \n", name, constant, imm);
     return offset + 3;
 }
 
-static int incrementInstructionU24(const char * name, const Chunk * chunk, const int offset) {
+static int incrementInstructionU24(const char *name, const Chunk *chunk, const int offset) {
     const int constant = disassembleU24Constant(chunk, offset);
     const uint8_t imm = chunk->code[offset + 2];
     printf("%-16s %4d %4d \n", name, constant, imm);
     return offset + 5;
 }
 
-static int jumpInstruction(const char* name, const int sign, const Chunk* chunk, const int offset) {
+static int jumpInstruction(const char *name, const int sign, const Chunk *chunk, const int offset) {
     const uint16_t jump = disassembleU16Constant(chunk, offset);
     printf("%-16s %4d -> %d\n", name, offset, offset + 3 + sign * jump);
     return offset + 3;
 }
 
-int invokeInstructionU8(const char* name, const Chunk * chunk, const int offset) {
+int invokeInstructionU8(const char *name, const Chunk *chunk, const int offset) {
     const uint8_t constant = chunk->code[offset + 1];
     const uint8_t argCount = chunk->code[offset + 2];
     printf("%-16s (%d args) %4d '", name, argCount, constant);
@@ -73,7 +73,7 @@ int invokeInstructionU8(const char* name, const Chunk * chunk, const int offset)
     return offset + 3;
 }
 
-int invokeInstructionU24(const char* name, const Chunk * chunk, const int offset) {
+int invokeInstructionU24(const char *name, const Chunk *chunk, const int offset) {
     const int constant = disassembleU24Constant(chunk, offset);
     const uint8_t argCount = chunk->code[offset + 2];
     printf("%-16s (%d args) %4d '", name, argCount, constant);
@@ -82,7 +82,7 @@ int invokeInstructionU24(const char* name, const Chunk * chunk, const int offset
     return offset + 5;
 }
 
-int disassembleInstruction(const Chunk* chunk, int offset) {
+int disassembleInstruction(const Chunk *chunk, int offset) {
 #define constInstruction(nameU8, nameU24, chunk, offset) wideInstruction \
         ? constantInstructionU24(nameU24, chunk, offset) \
         : constantInstructionU8(nameU8, chunk, offset);
@@ -207,7 +207,7 @@ int disassembleInstruction(const Chunk* chunk, int offset) {
         case OP_LOOP_IF_FALSE:
             return jumpInstruction("OP_LOOP_IF_FALSE", -1, chunk, offset);
         case OP_JOIN_STR:
-            return indexInstructionU8("OP_CALL", chunk, offset); 
+            return indexInstructionU8("OP_CALL", chunk, offset);
         case OP_PRINT:
             return simpleInstruction("OP_PRINT", offset);
         case OP_CALL:
@@ -217,12 +217,12 @@ int disassembleInstruction(const Chunk* chunk, int offset) {
             offset += wideInstruction ? 4 : 2;
             printf("%-16s %4d \n", wideInstruction ? "OP_CLOSURE.W" : "OP_CLOSURE", constant);
 
-            const ObjFunction* function = AS_FUNCTION(chunk->constants.values[constant]);
+            const ObjFunction *function = AS_FUNCTION(chunk->constants.values[constant]);
             for (int i = 0; i < function->upvalueCount; ++i) {
                 const int isLocal = chunk->code[offset++];
                 const int index = chunk->code[offset++];
                 printf("%04d      |                     %s %d\n",
-                    offset - 2, isLocal ? "local" : "upvalue", index);
+                       offset - 2, isLocal ? "local" : "upvalue", index);
             }
             return offset;
         }

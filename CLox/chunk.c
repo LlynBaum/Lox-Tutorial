@@ -3,7 +3,7 @@
 #include "memory.h"
 #include "vm.h"
 
-void initChunk(Chunk* chunk) {
+void initChunk(Chunk *chunk) {
     chunk->count = 0;
     chunk->capacity = 0;
     chunk->code = NULL;
@@ -13,14 +13,14 @@ void initChunk(Chunk* chunk) {
     initValueArray(&chunk->constants);
 }
 
-void freeChunk(Chunk* chunk) {
+void freeChunk(Chunk *chunk) {
     FREE_ARRAY(uint8_t, chunk->code, chunk->capacity);
     FREE_ARRAY(LineStart, chunk->lines, chunk->capacity);
     freeValueArray(&chunk->constants);
     initChunk(chunk);
 }
 
-void writeByte(Chunk* chunk, const uint8_t byte) {
+void writeByte(Chunk *chunk, const uint8_t byte) {
     if (chunk->capacity < chunk->count + 1) {
         const int oldCapacity = chunk->capacity;
         chunk->capacity = GROW_CAPACITY(oldCapacity);
@@ -30,7 +30,7 @@ void writeByte(Chunk* chunk, const uint8_t byte) {
     chunk->code[chunk->count++] = byte;
 }
 
-void writeChunk(Chunk* chunk, const uint8_t byte, const int line) {
+void writeChunk(Chunk *chunk, const uint8_t byte, const int line) {
     writeByte(chunk, byte);
 
     if (chunk->lineCount > 0 && chunk->lines[chunk->lineCount - 1].line == line) {
@@ -43,19 +43,19 @@ void writeChunk(Chunk* chunk, const uint8_t byte, const int line) {
         chunk->lines = GROW_ARRAY(LineStart, chunk->lines, oldCapacity, chunk->lineCapacity);
     }
 
-    LineStart* lineStart = &chunk->lines[chunk->lineCount++];
+    LineStart *lineStart = &chunk->lines[chunk->lineCount++];
     lineStart->offset = chunk->count - 1;
     lineStart->line = line;
 }
 
-int addConstant(Chunk* chunk, const Value value) {
+int addConstant(Chunk *chunk, const Value value) {
     push(value);
     writeValueArray(&chunk->constants, value);
     pop();
     return chunk->constants.count - 1;
 }
 
-bool writeIndexBytes(const OpCode code, Chunk* chunk, const int index) {
+bool writeIndexBytes(const OpCode code, Chunk *chunk, const int index) {
     if (index < 256) {
         writeByte(chunk, code);
         writeByte(chunk, index);
@@ -73,7 +73,7 @@ bool writeIndexBytes(const OpCode code, Chunk* chunk, const int index) {
     return false;
 }
 
-bool writeIndex(const OpCode code, Chunk* chunk, const int index, const int line) {
+bool writeIndex(const OpCode code, Chunk *chunk, const int index, const int line) {
     if (index < 256) {
         writeChunk(chunk, code, line);
         writeChunk(chunk, index, line);
@@ -91,22 +91,22 @@ bool writeIndex(const OpCode code, Chunk* chunk, const int index, const int line
     return false;
 }
 
-bool writeConstantCode(const OpCode code, Chunk* chunk, const Value value, const int line) {
+bool writeConstantCode(const OpCode code, Chunk *chunk, const Value value, const int line) {
     const int index = addConstant(chunk, value);
     return writeIndex(code, chunk, index, line);
 }
 
-bool writeConstant(Chunk* chunk, const Value value, const int line) {
+bool writeConstant(Chunk *chunk, const Value value, const int line) {
     return writeConstantCode(OP_CONSTANT, chunk, value, line);
 }
 
-int getLine(const Chunk* chunk, const size_t instruction) {
+int getLine(const Chunk *chunk, const size_t instruction) {
     int start = 0;
     int end = chunk->lineCount - 1;
 
     while (true) {
         const int mid = (start + end) / 2;
-        const LineStart* line = &chunk->lines[mid];
+        const LineStart *line = &chunk->lines[mid];
 
         if (instruction < line->offset) {
             end = mid - 1;

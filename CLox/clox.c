@@ -4,11 +4,9 @@
 #include "common.h"
 #include "vm.h"
 
-static char *readFile(const char *path)
-{
+static char *readFile(const char *path) {
     FILE *file = fopen(path, "rb");
-    if (file == NULL)
-    {
+    if (file == NULL) {
         fprintf(stderr, "Could not open file \"%s\".\n", path);
         exit(74);
     }
@@ -18,15 +16,13 @@ static char *readFile(const char *path)
     rewind(file);
 
     char *buffer = malloc(fileSize + 1);
-    if (buffer == NULL)
-    {
+    if (buffer == NULL) {
         fprintf(stderr, "Not enough memory to read \"%s\".\n", path);
         exit(74);
     }
 
     const size_t bytesRead = fread(buffer, sizeof(char), fileSize, file);
-    if (bytesRead < fileSize)
-    {
+    if (bytesRead < fileSize) {
         fprintf(stderr, "Could not read file \"%s\".\n", path);
         exit(74);
     }
@@ -36,8 +32,7 @@ static char *readFile(const char *path)
     return buffer;
 }
 
-static void runFile(const char *path)
-{
+static void runFile(const char *path) {
     char *source = readFile(path);
     const InterpretResult result = interpret(source);
     free(source);
@@ -48,15 +43,12 @@ static void runFile(const char *path)
         exit(70);
 }
 
-static void repl()
-{
+static void repl() {
     char line[1024];
-    for (;;)
-    {
+    for (;;) {
         printf(">  ");
 
-        if (!fgets(line, sizeof(line), stdin))
-        {
+        if (!fgets(line, sizeof(line), stdin)) {
             printf("\n");
             break;
         }
@@ -65,20 +57,14 @@ static void repl()
     }
 }
 
-int main(const int argc, const char *argv[])
-{
+int main(const int argc, const char *argv[]) {
     initVM();
-    
-    if (argc == 1)
-    {
+
+    if (argc == 1) {
         repl();
-    }
-    else if (argc == 2)
-    {
+    } else if (argc == 2) {
         runFile(argv[1]);
-    }
-    else
-    {
+    } else {
         fprintf(stderr, "Usage: clox [path]\n");
         exit(64);
     }

@@ -4,8 +4,7 @@
 #include "common.h"
 #include "value.h"
 
-typedef enum
-{
+typedef enum {
     OP_WIDE,
     OP_CONSTANT,
     OP_CONSTANT_M1,
@@ -64,14 +63,12 @@ typedef enum
     OP_METHOD
 } OpCode;
 
-typedef struct
-{
+typedef struct {
     int offset;
     int line;
 } LineStart;
 
-typedef struct
-{
+typedef struct {
     int count;
     int capacity;
     uint8_t *code;
@@ -82,13 +79,21 @@ typedef struct
 } Chunk;
 
 void initChunk(Chunk *chunk);
+
 void freeChunk(Chunk *chunk);
+
 void writeChunk(Chunk *chunk, uint8_t byte, int line);
+
 int addConstant(Chunk *chunk, Value value);
+
 bool writeIndexBytes(OpCode code, Chunk *chunk, int index);
+
 bool writeIndex(OpCode code, Chunk *chunk, int index, int line);
+
 bool writeConstantCode(OpCode code, Chunk *chunk, Value value, int line);
+
 bool writeConstant(Chunk *chunk, Value value, int line);
+
 int getLine(const Chunk *chunk, size_t instruction);
 
 #endif // clox_chunk_h

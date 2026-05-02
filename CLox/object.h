@@ -49,9 +49,9 @@ struct ObjString {
 
 typedef struct ObjUpvalue {
     Obj obj;
-    Value* location;
+    Value *location;
     Value closed;
-    struct ObjUpvalue* next;
+    struct ObjUpvalue *next;
 } ObjUpvalue;
 
 typedef struct {
@@ -59,74 +59,86 @@ typedef struct {
     int arity;
     int upvalueCount;
     Chunk chunk;
-    ObjString* name;
+    ObjString *name;
 } ObjFunction;
 
 typedef struct {
     Obj obj;
-    ObjFunction* function;
-    ObjUpvalue** upvalues;
+    ObjFunction *function;
+    ObjUpvalue **upvalues;
     int upvalueCount;
 } ObjClosure;
 
 typedef struct {
     Obj obj;
-    ObjString* name;
-    ObjClosure* init;
+    ObjString *name;
+    ObjClosure *init;
     Table methods;
 } ObjClass;
 
 typedef struct {
     Obj obj;
-    ObjClass* klass;
+    ObjClass *klass;
     Table fields;
 } ObjInstance;
 
 typedef struct {
     Obj obj;
     Value receiver;
-    ObjClosure* method;
+    ObjClosure *method;
 } ObjBoundMethod;
 
-typedef bool (*NativeFn)(int argCount, Value* args);
+typedef bool (*NativeFn)(int argCount, Value *args);
 
 typedef struct {
     Obj obj;
     NativeFn function;
 } ObjNative;
 
-ObjBoundMethod* newBoundMethod(Value receiver, ObjClosure* method);
-ObjClass* newClass(ObjString* name);
-ObjClosure* newClosure(ObjFunction* function);
-ObjFunction* newFunction();
-ObjInstance* newInstance(ObjClass* klass);
-ObjNative* newNative(NativeFn function);
-ObjString* allocateString(int length);
-uint32_t hashString(const char* key, int length);
-ObjString* internString(ObjString* string);
-ObjString* copyString(const char* chars, int length);
-ObjString* concatenateStrings(const char* aChars, int aLength, const char* bChars, int bLength);
-ObjUpvalue* newUpvalue(Value* slot);
+ObjBoundMethod *newBoundMethod(Value receiver, ObjClosure *method);
+
+ObjClass *newClass(ObjString *name);
+
+ObjClosure *newClosure(ObjFunction *function);
+
+ObjFunction *newFunction();
+
+ObjInstance *newInstance(ObjClass *klass);
+
+ObjNative *newNative(NativeFn function);
+
+ObjString *allocateString(int length);
+
+uint32_t hashString(const char *key, int length);
+
+ObjString *internString(ObjString *string);
+
+ObjString *copyString(const char *chars, int length);
+
+ObjString *concatenateStrings(const char *aChars, int aLength, const char *bChars, int bLength);
+
+ObjUpvalue *newUpvalue(Value *slot);
+
 void printObject(Value value);
 
-static inline ObjType objType(Obj* object) {
-    return (ObjType)((object->header >> 56) & 0xff);
+static inline ObjType objType(Obj *object) {
+    return (ObjType) ((object->header >> 56) & 0xff);
 }
 
-static inline bool getMarkValue(Obj* object) {
-    return (bool)((object->header >> 48) & 0x01);
+static inline bool getMarkValue(Obj *object) {
+    return (bool) ((object->header >> 48) & 0x01);
 }
 
-static inline Obj* nextObj(Obj* object) {
-    return (Obj*)(object->header & 0x0000ffffffffffff);
+static inline Obj *nextObj(Obj *object) {
+    return (Obj *) (object->header & 0x0000ffffffffffff);
 }
 
-static inline void setIsMarked(Obj* object, bool isMarked) {
-    object->header = (object->header & 0xff00ffffffffffff) | ((uint64_t)isMarked << 48);
+static inline void setIsMarked(Obj *object, bool isMarked) {
+    object->header = (object->header & 0xff00ffffffffffff) | ((uint64_t) isMarked << 48);
 }
 
-static inline void setNextObj(Obj* object, Obj* next) {
-    object->header = (object->header & 0xffff000000000000) | (uint64_t)next;
+static inline void setNextObj(Obj *object, Obj *next) {
+    object->header = (object->header & 0xffff000000000000) | (uint64_t) next;
 }
 
 static inline bool isObjType(const Value value, const ObjType type) {

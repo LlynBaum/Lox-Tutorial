@@ -7,7 +7,8 @@
 
 typedef enum { BINDING_LOCAL, BINDING_UPVALUE, BINDING_GLOBAL } BindingKind;
 
-ObjFunction* compile(const char* source);
+ObjFunction *compile(const char *source);
+
 void markCompilerRoots();
 
 #endif //clox_compiler_h

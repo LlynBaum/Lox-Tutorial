@@ -18,17 +18,20 @@ typedef struct {
     Table globalNames;
     int capacity;
     int count;
-    Global* values;
+    Global *values;
 } Globals;
 
-void initGlobals(Globals* globals);
-void freeGlobals(Globals* globals);
+void initGlobals(Globals *globals);
 
-int declareGlobal(Globals* globals, const ObjString* name, bool immutable);
-void defineGlobal(Globals* globals, const ObjString* name, Value value, bool immutable);
-bool lookUpGlobal(const Globals* globals, const ObjString* name, int* out);
+void freeGlobals(Globals *globals);
 
-static inline bool getGlobal(const Globals globals, const int index, Value* out) {
+int declareGlobal(Globals *globals, const ObjString *name, bool immutable);
+
+void defineGlobal(Globals *globals, const ObjString *name, Value value, bool immutable);
+
+bool lookUpGlobal(const Globals *globals, const ObjString *name, int *out);
+
+static inline bool getGlobal(const Globals globals, const int index, Value *out) {
     *out = globals.values[index].value;
     return !IS_UNDEFINED(*out);
 }
