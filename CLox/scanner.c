@@ -1,5 +1,4 @@
 #include "scanner.h"
-#include <stdio.h>
 #include <string.h>
 
 #include "common.h"
@@ -93,12 +92,12 @@ static void skipWhitespace() {
                 if (next == '/') {
                     while (peek() != '\n' && !isAtEnd()) advance();
                     break;
-                } else if (next == '*') {
+                }
+                if (next == '*') {
                     while (peek() != '*' && peekNext() != '/' && !isAtEnd()) advance();
                     break;
-                } else {
-                    return;
                 }
+                return;
             }
             default:
                 return;
@@ -337,6 +336,8 @@ Token scanToken() {
             return makeToken(match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
         case '"':
             return string();
+        default:
+            break;
     }
 
     return errorToken("Unexpected character.");
