@@ -875,7 +875,7 @@ static void super_(bool _) {
     consume(TOKEN_DOT, "Expect '.' after 'super'.");
     consume(TOKEN_IDENTIFIER, "Expect superclass method name.");
     const Token *nameToken = &parser.previous;
-    const int name = identifierConstant(nameToken, false, true);
+    const int name = makeIdentifier(nameToken);
 
     namedVariable(syntheticToken("this"), false);
     if (match(TOKEN_LEFT_PAREN)) {
@@ -1124,13 +1124,13 @@ static void method() {
 static void classDeclaration() {
     const int index = parseVariable("Expect class name.", true);
 
-    const Token *className = &parser.previous;
-    const int nameConst = makeIdentifier(className);
+    const Token className = parser.previous;
+    const int nameConst = makeIdentifier(&className);
 
     makeInitialized();
 
     emitBytes(OP_CLASS, nameConst);
-    defineVariable(index, className->line);
+    defineVariable(index, className.line);
 
     ClassCompiler classCompiler;
     classCompiler.enclosing = currentClass;
@@ -1141,7 +1141,7 @@ static void classDeclaration() {
         consume(TOKEN_IDENTIFIER, "Expect superclass name.");
         variable(false);
 
-        if (identifiersEqual(className, &parser.previous)) {
+        if (identifiersEqual(&className, &parser.previous)) {
             error("A class can't inherit from itself.");
         }
 
@@ -1149,12 +1149,12 @@ static void classDeclaration() {
         addLocal(syntheticToken("super"), true);
         makeInitialized();
 
-        namedVariable(*className, false);
+        namedVariable(className, false);
         emitByte(OP_INHERIT);
         classCompiler.hasSuperclass = true;
     }
 
-    namedVariable(*className, false);
+    namedVariable(className, false);
     consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
 
     while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF)) {

@@ -24,6 +24,8 @@ endif()
 
 if(DEBUG_LOG_GC)
         add_compile_definitions(DEBUG_LOG_GC)
+        add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+        add_link_options(-fsanitize=address)
 endif()
 
 add_executable(CLox clox.c

@@ -4,7 +4,7 @@
 
 #include <string.h>
 
-Value joinString(int argCount, Value *args) {
+Value joinString(const int argCount, Value *args) {
     int length = 0;
     for (int i = 0; i < argCount; i++)
     {
@@ -16,7 +16,7 @@ Value joinString(int argCount, Value *args) {
         length += AS_STRING(args[i])->length;
     }
 
-    ObjString *result = allocateString(length);
+    ObjString *result = allocateStringUnlinked(length);
 
     int current = 0;
     for (int i = 0; i < argCount; i++)
@@ -29,6 +29,10 @@ Value joinString(int argCount, Value *args) {
     result->chars[length] = '\0';
     result->hash = hashString(result->chars, length);
     result = internString(result);
+
+    if (nextObj((Obj*)result) == NULL) {
+        linkObject((Obj*)result);
+    }
 
     return OBJ_VAL(result);
 }

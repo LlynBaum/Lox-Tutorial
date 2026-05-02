@@ -95,6 +95,8 @@ typedef struct {
     NativeFn function;
 } ObjNative;
 
+void linkObject(Obj* object);
+
 ObjBoundMethod *newBoundMethod(Value receiver, ObjClosure *method);
 
 ObjClass *newClass(ObjString *name);
@@ -106,6 +108,8 @@ ObjFunction *newFunction();
 ObjInstance *newInstance(ObjClass *klass);
 
 ObjNative *newNative(NativeFn function);
+
+ObjString *allocateStringUnlinked(int length);
 
 ObjString *allocateString(int length);
 
@@ -121,19 +125,19 @@ ObjUpvalue *newUpvalue(Value *slot);
 
 void printObject(Value value);
 
-static inline ObjType objType(Obj *object) {
+static inline ObjType objType(const Obj *object) {
     return (ObjType) ((object->header >> 56) & 0xff);
 }
 
-static inline bool getMarkValue(Obj *object) {
+static inline bool getMarkValue(const Obj *object) {
     return (bool) ((object->header >> 48) & 0x01);
 }
 
-static inline Obj *nextObj(Obj *object) {
+static inline Obj *nextObj(const Obj *object) {
     return (Obj *) (object->header & 0x0000ffffffffffff);
 }
 
-static inline void setIsMarked(Obj *object, bool isMarked) {
+static inline void setIsMarked(Obj *object, const bool isMarked) {
     object->header = (object->header & 0xff00ffffffffffff) | ((uint64_t) isMarked << 48);
 }
 

@@ -52,3 +52,24 @@ class CoffeeMaker {
 
 var maker = CoffeeMaker("coffee");
 maker.brew();
+
+
+
+
+class Coffee {
+    brew() {
+        print "Enjoy your cup of coffee.";
+    }
+}
+
+class Drink < Coffee {
+    make() {
+        super.brew();
+
+        var ka = super.brew;
+        ka();
+    }
+}
+
+var drink = Drink();
+drink.make();

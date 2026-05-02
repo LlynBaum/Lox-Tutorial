@@ -23,6 +23,22 @@ static Obj *allocateObject(const size_t size, const ObjType type) {
     return obj;
 }
 
+static Obj *allocateObjectUnlinked(const size_t size, const ObjType type) {
+    Obj *obj = reallocate(NULL, 0, size);
+    obj->header = (uint64_t) NULL | (uint64_t) vm.markValue << 48 | (uint64_t) type << 56;
+
+#ifdef DEBUG_LOG_GC
+    printf("%p allocate %zu for %d\n", (void *) obj, size, type);
+#endif // DEBUG_LOG_GC
+
+    return obj;
+}
+
+void linkObject(Obj* object) {
+    setNextObj(object, vm.objects);
+    vm.objects = object;
+}
+
 ObjBoundMethod *newBoundMethod(Value receiver, ObjClosure *method) {
     ObjBoundMethod *bound = ALLOCATE_OBJ(ObjBoundMethod, OBj_BOUND_METHOD);
 
@@ -74,6 +90,12 @@ ObjNative *newNative(const NativeFn function) {
     return native;
 }
 
+ObjString *allocateStringUnlinked(const int length) {
+    ObjString *string = (ObjString *) allocateObjectUnlinked(sizeof(ObjString) + length + 1, OBJ_STRING);
+    string->length = length;
+    return string;
+}
+
 ObjString *allocateString(const int length) {
     ObjString *string = (ObjString *) allocateObject(sizeof(ObjString) + length + 1, OBJ_STRING);
     string->length = length;
@@ -118,15 +140,18 @@ ObjString *internString(ObjString *string) {
 
 ObjString *concatenateStrings(const char *aChars, const int aLength, const char *bChars, const int bLength) {
     const int length = aLength + bLength;
-    ObjString *result = allocateString(length);
+    ObjString *result = allocateStringUnlinked(length);
     memcpy(result->chars, aChars, aLength);
     memcpy(result->chars + aLength, bChars, bLength);
     result->chars[length] = '\0';
     result->hash = hashString(result->chars, length);
 
-    push(OBJ_VAL(result));
     result = internString(result);
-    pop();
+
+    if (nextObj((Obj*)result) == NULL) {
+        linkObject((Obj*)result);
+    }
+
     return result;
 }
 
